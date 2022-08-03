@@ -1,0 +1,4 @@
+classes= 28
+
+names = ./yolov4/voc.names
+

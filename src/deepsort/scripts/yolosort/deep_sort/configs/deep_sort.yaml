@@ -1,0 +1,10 @@
+DEEPSORT:
+  REID_CKPT: "deep_sort/deep_sort/deep/checkpoint/ckpt.t7"                 # 特征提取网络权重文件
+  MAX_DIST: 0.2                                                            # 级联匹配阈值，最大余弦距离，大于该值则特征不匹配
+  MIN_CONFIDENCE: 0.3                                                      # detection置信度阈值
+  NMS_MAX_OVERLAP: 0.5                                                     # NMS 阈值
+  MAX_IOU_DISTANCE: 0.7                                                    # IOU匹配阈值
+  MAX_AGE: 120                                                             # 最大寿命，连续X帧未追踪到即删除track
+  N_INIT: 3                                                                # track的uncomfired态->comfirmed态的阈值
+  NN_BUDGET: 120                                                           # 特征最大保存帧数
+  
