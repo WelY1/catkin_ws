@@ -39,8 +39,8 @@ class DeepSort(object):
         # 从原图中抠取bbox对应图片并计算得到相应的特征
         features = self._get_features(bbox_xywh, ori_img)
         bbox_tlwh = self._xywh_to_tlwh(bbox_xywh) 
-        # 把车辆抠出来存到detection里
-        cars = self._get_cars(bbox_xywh, ori_img)   
+        # detetction.car存的是car在图中的坐标
+        cars = self._get_cars(bbox_xywh)   
         '''
         TODO:
             第一种思路是在这里（匹配前）计算detection的embedding的时候就把车牌检测并OCR，存到detection中
@@ -59,7 +59,7 @@ class DeepSort(object):
 
         # update tracker
         self.tracker.predict() # 将跟踪状态分布向前传播一步
-        self.tracker.update(detections) # 执行测量更新和跟踪管理
+        self.tracker.update(ori_img, detections) # 执行测量更新和跟踪管理
 
         # output bbox identities
         outputs = []
@@ -140,12 +140,12 @@ class DeepSort(object):
             features = np.array([])
         return features
         
-    def _get_cars(self, bbox_xywh, ori_img):
+    def _get_cars(self, bbox_xywh):
         car_crops = []
         for box in bbox_xywh:
             x1,y1,x2,y2 = self._xywh_to_xyxy(box)
-            im = ori_img[y1:y2,x1:x2] # 抠图部分
-            car_crops.append(im)
+            # im = ori_img[y1:y2,x1:x2] # 抠图部分
+            car_crops.append((x1,y1,x2,y2))
         return car_crops
 
 

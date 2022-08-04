@@ -13,9 +13,7 @@ VIDEO_PATH = RosPack().get_path('deepsort') + '/scripts/yolosort/video/test_traf
 RESULT_PATH = RosPack().get_path('deepsort') + '/scripts/result.mp4'
 
 def main():
-    
-    
-    
+       
     func_status = {}
     func_status['headpose'] = None
     

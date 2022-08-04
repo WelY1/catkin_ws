@@ -31,7 +31,7 @@ class Detection(object):
         self.tlwh = np.asarray(tlwh, dtype=np.float)                              # 将array转化为ndarray
         self.confidence = float(confidence)
         self.feature = np.asarray(feature, dtype=np.float32)
-        self.car = car        # image
+        self.car = np.asarray(car, dtype=np.int) 
         
     def to_tlbr(self):
         """Convert bounding box to format `(min x, min y, max x, max y)`, i.e.,

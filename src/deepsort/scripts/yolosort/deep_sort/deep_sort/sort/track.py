@@ -159,7 +159,7 @@ class Track:
         self.time_since_update += 1          # 距离上次更新加1
 
 
-    def update(self, kf, img_pub, bridge, msg, detection):
+    def update(self, kf, detection):
         """Perform Kalman filter measurement update step and update the feature
         cache.
         执行卡尔曼滤波器测量更新步骤并更新feature缓存
@@ -172,20 +172,7 @@ class Track:
             The associated detection.
 
         """
-        # 如果lp未被锁定就更新, 发布信息给另一个结点，来ocr车牌  
-        
-        if not len(self.lp_confirmed):
-            # img_pub = rospy.Publisher('lp', Lp, queue_size=2)
-            rate = rospy.Rate(1000) # hz     
-            # bridge = CvBridge()
-            img_msg = bridge.cv2_to_imgmsg(detection.car, encoding="bgr8")
-            # msg = Lp()
-            msg.id = self.track_id
-            msg.lp = img_msg
-            img_pub.publish(msg)
-            
-            rate.sleep()
-                    
+                           
         #
         self.mean, self.covariance = kf.update(
             self.mean, self.covariance, detection.to_xyah())
@@ -197,8 +184,22 @@ class Track:
         if self.state == TrackState.Tentative and self.hits >= self._n_init:
             self.state = TrackState.Confirmed
                 
+    def lp_publish(self, img_pub, bridge, msg, car_img):  
+        # 如果lp未被锁定就更新, 发布信息给另一个结点，来ocr车牌  
+        
+        # img_pub = rospy.Publisher('lp', Lp, queue_size=2)
+        rate = rospy.Rate(1000) # hz     
+
+        img_msg = bridge.cv2_to_imgmsg(car_img, encoding="bgr8")
+
+        msg.id = self.track_id
+        msg.lp = img_msg
+        img_pub.publish(msg)
+        
+        rate.sleep()
+                
     
-    def lp_update(self, lp):   # 更新车牌
+    def lp_add(self, lp):   # 更新车牌
         
         if not len(self.lp_confirmed):  # 如果lp未被锁定就更新
             if len(lp):             

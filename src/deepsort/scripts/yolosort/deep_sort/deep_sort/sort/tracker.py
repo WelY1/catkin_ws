@@ -83,7 +83,7 @@ class Tracker:
         print('{}:{}'.format(id,lp))
         try:
             track_index = self.tracks_id.index(id)
-            self.tracks[track_index].lp_update(lp)
+            self.tracks[track_index].lp_add(lp)
         except ValueError:
             pass
         
@@ -101,7 +101,11 @@ class Tracker:
         rate = rospy.Rate(30)
         rate.sleep()
     
-    def update(self, detections):
+    def inROI(self, x1, y1, x2, y2, h, w):
+        
+        pass
+    
+    def update(self, ori_img, detections):
         """Perform measurement update and track management.
         执行测量更新和轨迹管理
 
@@ -120,7 +124,16 @@ class Tracker:
         # 1. 针对匹配上的结果
         for track_idx, detection_idx in matches:
             # 更新tracks中相应的detection
-            self.tracks[track_idx].update(self.kf, self.img_pub, self.bridge, self.msg, detections[detection_idx])
+            target = detections[detection_idx]
+            self.tracks[track_idx].update(self.kf, target) # 更新位置和track的状态
+            # 如果车辆车牌没被锁定就更新车牌
+            if not len(self.tracks[track_idx].lp_confirmed):
+                x1, y1, x2, y2 = target.car[0], target.car[1], target.car[2], target.car[3]
+                # 如果车在ROI范围内就识别车牌
+                # if self.inROI(x1, y1, x2, y2, ori_img.shape[0], ori_img.shape[1]):
+                car_img = ori_img[y1:y2, x1:x2]
+                self.tracks[track_idx].lp_publish(self.img_pub, self.bridge, self.msg, car_img)
+        
         update_time = time.time() - update_start
         # print(update_time)
                
