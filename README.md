@@ -4,13 +4,13 @@
 {**宇通车路协同项目视觉感知部分**}
 
 #### 软件架构
-[yolov4-darknet](http://https://github.com/AlexeyAB/darknet)
+[yolov4-darknet](https://https://github.com/AlexeyAB/darknet)
 
 [deepsort](https://blog.csdn.net/didiaopao/article/details/120274519?spm=1001.2014.3001.5502)
 
 [yolov5-6](https://github.com/ultralytics/yolov5)
 
-[deep-text-recognition-benchmark](http://https://github.com/clovaai/deep-text-recognition-benchmark)
+[deep-text-recognition-benchmark](https://https://github.com/clovaai/deep-text-recognition-benchmark)
 
 ROS
 
