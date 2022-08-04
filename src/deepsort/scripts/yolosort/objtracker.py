@@ -8,6 +8,9 @@ import time
 
 from rospkg import RosPack
 
+from deepsort.msg import Bbox
+from deepsort.msg import Bboxes
+
 cfg = get_config()
 cfg.merge_from_file(RosPack().get_path('deepsort') + "/scripts/yolosort/deep_sort/configs/deep_sort.yaml")
 deepsort = DeepSort(cfg.DEEPSORT.REID_CKPT,
@@ -42,11 +45,7 @@ def plot_bboxes(image, bboxes, line_thickness=None):
         cv2.rectangle(image, c1, c2, color, thickness=tl, lineType=cv2.LINE_AA)          # detection box plot
         tf = max(tl - 1, 1)  # font thickness
         c2 = c1[0], c1[1] - 3
-        # if len(lp_index):
-        #     lplist = [character[c] for c in lp_index]
-        #     lp = ''.join(lplist)[1:]
-        # else:
-        #     lp = 'None'
+        
         cv2.putText(image, 'CAR-{}-{}'.format(lp,pos_id), (c1[0], c1[1] - 2), 0, tl / 3,
                     [225, 255, 255], thickness=tf, lineType=cv2.LINE_AA)
                     
@@ -63,7 +62,7 @@ def plot_bboxes(image, bboxes, line_thickness=None):
 def update(target_detector, image):
 
         det_start = time.time()
-        _, bboxes = target_detector.detect(image)              #  img,  [x1, y1, x2, y2,  label, confidence, lp_img]
+        _, bboxes = target_detector.detect(image)              #  img,  [x1, y1, x2, y2, class, confidence]
         det_time = time.time() - det_start
         
         bbox_xywh = []
@@ -75,8 +74,8 @@ def update(target_detector, image):
                 # [center_x, center_y, w, h]
                 bbox_xywh.append([x, y, w, h])                                           
                 confs.append(conf)                             # [confidence]
-            xywhs = torch.Tensor(bbox_xywh)
-            confss = torch.Tensor(confs)
+            xywhs = np.array(bbox_xywh)
+            confss = np.array(confs)
     
             dpsort_start = time.time()
             # Pass detections to deepsort
@@ -84,6 +83,7 @@ def update(target_detector, image):
             dpsort_time = time.time() - dpsort_start
             # print('det:{} fps, dpsort:{} fps'.format(int(1/det_time),int(1/dpsort_time)))
             
+            bboxes_msg = Bboxes()
             
             for value in list(outputs):
                 x1,y1,x2,y2,track_id,track_lp = value
@@ -93,7 +93,16 @@ def update(target_detector, image):
                 y2 = eval(y2)
                 track_id = eval(track_id)
                 bboxes2draw.append((x1, y1, x2, y2, track_id, track_lp))
-                # print((x1+x2)/2, (y1+y2)/2, track_id, track_lp)
+                
+                bbox_msg = Bbox('Car',
+                                int((x1 + x2) / 2),
+                                int((y1 + y2) / 2),
+                                x2 - x1,
+                                y2 - y1,
+                                track_id,
+                                track_lp)
+                bboxes_msg.bboxes.append(bbox_msg)
+                
         image = plot_bboxes(image, bboxes2draw)
 
-        return image, bboxes2draw
+        return image, bboxes_msg

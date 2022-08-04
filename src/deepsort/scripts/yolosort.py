@@ -8,6 +8,7 @@ rospy.init_node('yolosort', anonymous=True)
 from yolosort.objdetector import Detector
 
 from rospkg import RosPack
+from deepsort.msg import Bboxes
 
 VIDEO_PATH = RosPack().get_path('deepsort') + '/scripts/yolosort/video/test_traffic.mp4'
 RESULT_PATH = RosPack().get_path('deepsort') + '/scripts/result.mp4'
@@ -27,7 +28,9 @@ def main():
 
     size = None
     videoWriter = None
-
+    
+    pub = rospy.Publisher('boundingboxes', Bboxes, queue_size=10)
+    
     while True:
 
         # try:
@@ -36,17 +39,22 @@ def main():
             break
         
         result = det.feedCap(im, func_status)
-        result = result['frame']
-        result = imutils.resize(result, height=500)
+        frame_img = result['frame']
+        frame_img = imutils.resize(frame_img, height=500)
         if videoWriter is None:
             fourcc = cv2.VideoWriter_fourcc(
                 'm', 'p', '4', 'v')  # opencv3.0
             videoWriter = cv2.VideoWriter(
-                RESULT_PATH, fourcc, fps, (result.shape[1], result.shape[0]))
+                RESULT_PATH, fourcc, fps, (frame_img.shape[1], frame_img.shape[0]))
 
-        videoWriter.write(result)
-        cv2.imshow(name, result)
+        videoWriter.write(frame_img)
+        cv2.imshow(name, frame_img)
         cv2.waitKey(t)
+        
+        # 发布当前帧的bboxes结果
+        bboxes_msg  = result['obj_bboxes']
+        pub.publish(bboxes_msg)
+        
 
         if cv2.getWindowProperty(name, cv2.WND_PROP_AUTOSIZE) < 1:
             # 点x退出

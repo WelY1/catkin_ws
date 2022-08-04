@@ -48,9 +48,9 @@ class DeepSort(object):
             伏笔：提取embedding特征的时候可以把特征层用于车牌检测，节省一步时间
             这步也可以不在这里就扣图，detection里存坐标也可以，如果超显存了，可以试试之后检测的时候以其扣图
         '''
+        
         # 筛选掉小于min_confidence的目标，并构造一个Detection对象构成的列表
         detections = [Detection(bbox_tlwh[i], conf, features[i], cars[i]) for i,conf in enumerate(confidences) if conf>self.min_confidence]   # 转换数据格式
-    
         # run on non-maximum supression
         boxes = np.array([d.tlwh for d in detections])
         scores = np.array([d.confidence for d in detections])

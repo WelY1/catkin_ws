@@ -38,12 +38,12 @@ class baseDet(object):
         self.frameCounter += 1
         
         start = time.time()
-        im, obj_bboxes = objtracker.update(self, im)
+        im, bboxes_msg = objtracker.update(self, im)
         frame_time = time.time() - start
         # print('******frame: {} fps*********'.format(int(1/frame_time)))
         
         retDict['frame'] = im
-        retDict['obj_bboxes'] = obj_bboxes
+        retDict['obj_bboxes'] = bboxes_msg 
 
         return retDict
 

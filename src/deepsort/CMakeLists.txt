@@ -53,6 +53,8 @@ add_message_files(
   FILES
   Lp.msg
   Result.msg
+  Bbox.msg
+  Bboxes.msg
 )
 
 ## Generate services in the 'srv' folder

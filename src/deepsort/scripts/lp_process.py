@@ -5,6 +5,7 @@
 # import rospkg
 import rospy
 import numpy as np
+import torch
 
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
@@ -40,23 +41,22 @@ def callback(msg):     # 无限循环
     # cv2.waitKey(1)
     
     # print('..')
-    
-    lpbox = det.detect(car_img)
-    if len(lpbox):
-        x1, y1, x2, y2 = lpbox[0], lpbox[1], lpbox[2], lpbox[3]
-        im_crops = []
-        im_crops.append(car_img[y1:y2,x1:x2])
-        lp, conf = ocr(im_crops)
-        rospy.loginfo('车辆id: %d, 车牌号: %s, 置信度: %f', id, lp, conf)
-        resultPub(id, lp, conf)
-    else:
-        lp = ''
-    
+    with torch.no_grad():
+        lpbox = det.detect(car_img)
+        
+        if len(lpbox):
+            x1, y1, x2, y2 = lpbox[0], lpbox[1], lpbox[2], lpbox[3]
+            im_crops = []
+            im_crops.append(car_img[y1:y2,x1:x2])
+            lp, conf = ocr(im_crops)
+            rospy.loginfo('车辆id: %d, 车牌号: %s, 置信度: %f', id, lp, conf)
+            resultPub(id, lp, conf)
+            
     # rospy.loginfo(id)
 
  
 def displayWebcam():                            # 只执行一次
-    rospy.init_node('sub', anonymous=True)
+    rospy.init_node('lpprocess', anonymous=True)
  
     global bridge   
     global det
