@@ -98,8 +98,6 @@ class Tracker:
         
         rospy.Subscriber("resultpub", Result, self.lpback, queue_size=1)
         
-        rate = rospy.Rate(30)
-        rate.sleep()
     
     def inROI(self, x1, y1, x2, y2, h, w):
         

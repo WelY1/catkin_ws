@@ -32,7 +32,7 @@ class Recognition(object):
     def __init__(self, use_cuda=True):
         self.workers = 4
         self.batch_size = 192
-        self.saved_model = RosPack().get_path('image_trans') + "/scripts/lp/best_accuracy.pth"
+        self.saved_model = RosPack().get_path('deepsort') + "/scripts/lp/best_accuracy.pth"
         """ Data processing """
         self.batch_max_length = 25
         self.imgH = 32
