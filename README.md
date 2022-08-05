@@ -23,12 +23,14 @@ ROS
 
 #### 使用说明
 
-1.  roscore
-2.  rosrun deepsort lp_process.py
-3.  rosrun deepsort yolosort.py
+1.  roscore 
+2.  rosrun deepsort lp_process.py        # 车牌检测及识别node
+3.  rosrun deepsort yolosort.py          # 车辆检测及deepsort
 
 ### #error
-如果提示找不到yolosort，则把/devel/lib/*.py 全删了，不知道还有其他办法没有
+如果提示找不到yolosort，则把/devel/lib/*.py 全删了，不知道还有没有其他办法
+
+### OCR目前的权重是CCPD2020数据集训练的，所以结果都是新能源车牌且区域码都是安徽
 
 #### 更新信息
 
