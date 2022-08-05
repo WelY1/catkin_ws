@@ -171,8 +171,7 @@ class Track:
         detection : Detection
             The associated detection.
 
-        """
-                           
+        """              
         #
         self.mean, self.covariance = kf.update(
             self.mean, self.covariance, detection.to_xyah())

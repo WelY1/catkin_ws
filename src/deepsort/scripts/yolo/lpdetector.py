@@ -13,7 +13,7 @@ from utils.general import non_max_suppression, scale_coords
 from utils.dataloaders import letterbox
 from utils.torch_utils import select_device
 
-DETECTOR_PATH = RosPack().get_path('image_trans')+'/scripts/yolo/weights/best.pt'
+DETECTOR_PATH = RosPack().get_path('deepsort')+'/scripts/yolo/weights/best.pt'
 
 
 
@@ -52,9 +52,7 @@ class Detector(object):
     def detect(self, im):
         im0, img = self.preprocess(im)
         pred = self.net(img, augment=False)[0]     #pred: tensor
-        pred = pred.float()
         pred = non_max_suppression(pred, self.confthreshold, self.iouthreshold)        # NMS  
-        
         maxconf = 0
         lpbox = ()
         if len(pred):
