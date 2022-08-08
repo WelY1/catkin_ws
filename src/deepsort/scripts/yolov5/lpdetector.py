@@ -13,7 +13,7 @@ from utils.general import non_max_suppression, scale_coords
 from utils.dataloaders import letterbox
 from utils.torch_utils import select_device
 
-DETECTOR_PATH = RosPack().get_path('deepsort')+'/scripts/yolo/weights/best.pt'
+DETECTOR_PATH = RosPack().get_path('deepsort')+'/scripts/yolov5/weights/best.pt'
 
 
 

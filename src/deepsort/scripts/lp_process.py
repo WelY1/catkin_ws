@@ -1,19 +1,15 @@
 #! /usr/bin/python
 #!coding=utf-8
   
-# import imp
-# import rospkg
 import rospy
-import numpy as np
 import torch
 
-from cv_bridge import CvBridge, CvBridgeError
-import cv2
+from cv_bridge import CvBridge
 
 from image_trans.msg import Lp
 from image_trans.msg import Result
 
-from yolo.lpdetector import Detector
+from yolov5.lpdetector import Detector
 from lp.recognition import Recognition
 
 def resultPub(id, lp, conf):

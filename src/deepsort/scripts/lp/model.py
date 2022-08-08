@@ -24,34 +24,32 @@ from .modules.prediction import Attention
 
 class Model(nn.Module):
 
-    def __init__(self, num_class):
+    def __init__(self, batch_max_length, imgH, imgW, 
+                Transformation, FeatureExtraction, SequenceModeling, Prediction,
+                num_fiducial, input_channel, output_channel, hidden_size, num_class):
         super(Model, self).__init__()
-        self.workers = 4
-        self.batch_size = 192
-        self.saved_model = 'best_accuracy.pth'
-        self.batch_max_length = 25
-        self.imgH = 32
-        self.imgW = 100
-        self.rgb = True
-        self.PAD = False
-        self.Transformation = 'TPS'
-        self.FeatureExtraction = 'ResNet'
-        self.SequenceModeling = 'BiLSTM'
-        self.Prediction = 'Attn'
-        self.num_fiducial = 20
-        self.input_channel = 3
-        self.output_channel = 512
-        self.hidden_size = 256
+        
+        self.batch_max_length = batch_max_length
+        self.imgH = imgH 
+        self.imgW = imgW 
+        self.Transformation = Transformation
+        self.FeatureExtraction = FeatureExtraction 
+        self.SequenceModeling = SequenceModeling
+        self.Prediction = Prediction 
+        self.num_fiducial = num_fiducial 
+        self.input_channel = input_channel
+        self.output_channel = output_channel
+        self.hidden_size = hidden_size
+        self.num_class = num_class
         self.stages = {'Trans': self.Transformation, 'Feat': self.FeatureExtraction,
                        'Seq': self.SequenceModeling, 'Pred': self.Prediction}
-        self.num_class = num_class
 
         """ Transformation """
         if self.Transformation == 'TPS':
             self.Transformation = TPS_SpatialTransformerNetwork(
                 F=self.num_fiducial, I_size=(self.imgH, self.imgW), I_r_size=(self.imgH, self.imgW), I_channel_num=self.input_channel)
-        else:
-            print('No Transformation module specified')
+        # else:
+        #     print('No Transformation module specified')
 
         """ FeatureExtraction """
         if self.FeatureExtraction == 'VGG':
