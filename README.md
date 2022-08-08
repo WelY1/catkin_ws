@@ -35,7 +35,7 @@ OCR目前的权重是CCPD2020数据集训练的，所以结果都是新能源车
 目前占用显存比较多，车牌检测及OCR结点大约占用4GB，yolov4及deepsort结点大约占5GB
 
 #### 更新信息
-
+ // version 1 (branch main)
 1.  -2022/08/03 version 1.0
     节点1做车辆目标检测及跟踪，节点2做车牌检测及OCR并发布车牌信息给节点1
 2.  -2022/08/04 version 1.1
@@ -50,3 +50,7 @@ OCR目前的权重是CCPD2020数据集训练的，所以结果都是新能源车
     用CCPD2019、CCPD2020、CLPD混合数据集重新训练OCR模型，改用'None-VGG-BiLSTM-CTC'model，单张推理时间在2-3ms，权重仅34MB，精度为92.9%
     8574/1558 + 9939/1837 + 1100/100
     ('None-ResNet-BiLSTM-CTC'model，单张推理时间在5-6ms，权重198MB，精度为94.9%）
+ 
+ // version 2 (branch version2)
+1.  -2022/08/08 version 2.0
+    合并为单个node, 目前帧率在15fps左右
