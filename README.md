@@ -46,3 +46,7 @@ OCR目前的权重是CCPD2020数据集训练的，所以结果都是新能源车
     （2）增加了publisher，用来发布每一帧bbox的结果，格式list of [class, cx, cy, w, h, id, lp]，不过class目前都归类为‘Car’; 
     
     （3）将torch.Tensor改为numpy，但显存没有降低。
+3.  -2022/08/08 version 1.2
+    用CCPD2019、CCPD2020、CLPD混合数据集重新训练OCR模型，改用'None-VGG-BiLSTM-CTC'model，单张推理时间在2-3ms，权重仅34MB，精度为92.9%
+    8574/1558 + 9939/1837 + 1100/100
+    ('None-ResNet-BiLSTM-CTC'model，单张推理时间在5-6ms，权重198MB，精度为94.9%）
