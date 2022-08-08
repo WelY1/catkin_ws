@@ -6,15 +6,10 @@ from . import iou_matching
 from .track import Track
 
 import time
-import rospy
-import cv2
-from cv_bridge import CvBridge, CvBridgeError
+
+from ..yolov5.lpdetector import Detector
+from ..lp.recognition import Recognition
 # from rospkg import RosPack
-
-import threading
-
-from image_trans.msg import Result
-from image_trans.msg import Lp
 
 class Tracker:
     """
@@ -59,11 +54,9 @@ class Tracker:
         self.tracks = []   # 保存一个轨迹列表，用于保存一系列轨迹
         self._next_id = 1  # 下一个分配的轨迹id
         
-        self.img_pub = rospy.Publisher('lp', Lp, queue_size=20)  #发布器
-        self.bridge = CvBridge()
-        self.msg = Lp()
+        self.det = Detector()
+        self.ocr = Recognition()
         
-        self.sublp()
 
  
     def predict(self):
@@ -74,30 +67,7 @@ class Tracker:
         """
         for track in self.tracks:
             track.predict(self.kf)          # track.predict
-    
-    def lpback(self, msg):
-        id = msg.id
-        lp = msg.lp
-        conf = msg.conf
-        # rospy.loginfo('{}:{}'.format(id,lp))
-        print('{}:{}'.format(id,lp))
-        try:
-            track_index = self.tracks_id.index(id)
-            self.tracks[track_index].lp_add(lp)
-        except ValueError:
-            pass
-        
-    
-    def thread_job(self):
-        rospy.spin()
-    
-    def sublp(self):  # 接收结点sub的消息，更新车牌
-    
-        add_thread = threading.Thread(target = self.thread_job) # 开启子线程
-        add_thread.start()
-        
-        rospy.Subscriber("resultpub", Result, self.lpback, queue_size=1)
-        
+
     
     def inROI(self, x1, y1, x2, y2, h, w):
         
@@ -130,7 +100,14 @@ class Tracker:
                 # 如果车在ROI范围内就识别车牌
                 # if self.inROI(x1, y1, x2, y2, ori_img.shape[0], ori_img.shape[1]):
                 car_img = ori_img[y1:y2, x1:x2]
-                self.tracks[track_idx].lp_publish(self.img_pub, self.bridge, self.msg, car_img)
+                lpbox = self.det.detect(car_img)
+                if len(lpbox):
+                    x1, y1, x2, y2 = lpbox[0], lpbox[1], lpbox[2], lpbox[3]
+                    im_crops = []
+                    im_crops.append(car_img[y1:y2,x1:x2])
+                    lp, conf = self.ocr(im_crops)
+                    if len(lp):
+                        self.tracks[track_idx].lp_queue(lp)
         
         update_time = time.time() - update_start
         # print(update_time)
@@ -146,7 +123,7 @@ class Tracker:
         
         # 得到最新的tracks列表，保存的是标记为Confirmed和Tentative的track
         self.tracks = [t for t in self.tracks if not t.is_deleted()]
-        self.tracks_id = [t.track_id for t in self.tracks]  # 保存的是tracks中每个track的id用来做映射
+        # self.tracks_id = [t.track_id for t in self.tracks]  # 保存的是tracks中每个track的id用来做映射
 
         # Update distance metric.
         active_targets = [t.track_id for t in self.tracks if t.is_confirmed()]   # 不包括tentative的track

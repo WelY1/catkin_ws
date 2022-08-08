@@ -1,4 +1,3 @@
-import rospy
 
 class TrackState:
     """
@@ -181,40 +180,13 @@ class Track:
         # hits代表匹配上了多少次，匹配次数超过n_init，设置Confirmed状态
         # 连续匹配上n_init帧的时候，转变为确定态
         if self.state == TrackState.Tentative and self.hits >= self._n_init:
-            self.state = TrackState.Confirmed
-                
-    def lp_publish(self, img_pub, bridge, msg, car_img):  
-        # 如果lp未被锁定就更新, 发布信息给另一个结点，来ocr车牌  
-        
-        # img_pub = rospy.Publisher('lp', Lp, queue_size=2)
-        rate = rospy.Rate(1000) # hz     
-
-        img_msg = bridge.cv2_to_imgmsg(car_img, encoding="bgr8")
-
-        msg.id = self.track_id
-        msg.lp = img_msg
-        img_pub.publish(msg)
-        
-        rate.sleep()
-                
-    
-    def lp_add(self, lp):   # 更新车牌
-        
-        if not len(self.lp_confirmed):  # 如果lp未被锁定就更新
-            if len(lp):             
-                self.lp_queue(lp)
-            
-        '''
-        除非lp为空否则不更新
-        TODO:
-        未来如果要对track的车牌号进行更新，在这里添加，目前先不更新。
-        '''
+            self.state = TrackState.Confirmed                             
     
     def lp_queue(self, lp):
         if len(self.lp)>=self.queue_length:
             self.lp.pop(0)
         self.lp.append(lp)
-        lp_most = max(self.lp, key=self.lp.count)  #出 现次数最多的lp
+        lp_most = max(self.lp, key=self.lp.count)  #出现次数最多的lp
         if self.lp.count(lp_most)>= self.queue_save:
             self.lp_confirmed = lp_most
     

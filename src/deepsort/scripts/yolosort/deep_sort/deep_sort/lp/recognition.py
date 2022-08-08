@@ -26,7 +26,7 @@ class Recognition(object):
     def __init__(self, use_cuda=True):
         self.workers = 4
         self.batch_size = 64
-        self.saved_model = RosPack().get_path('deepsort') + "/scripts/lp/None-VGG-BiLSTM-CTC.pth"
+        self.saved_model = RosPack().get_path('deepsort') + "/scripts/yolosort/deep_sort/deep_sort/lp/None-VGG-BiLSTM-CTC.pth"
         """ Data processing """
         self.batch_max_length = 25
         self.imgH = 32

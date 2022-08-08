@@ -43,7 +43,7 @@ def main():
         frame_img = imutils.resize(frame_img, height=500)
         if videoWriter is None:
             fourcc = cv2.VideoWriter_fourcc(
-                'm', 'p', '4', 'v')  # opencv3.0
+                'm', 'p', '4', 'v')  
             videoWriter = cv2.VideoWriter(
                 RESULT_PATH, fourcc, fps, (frame_img.shape[1], frame_img.shape[0]))
 
