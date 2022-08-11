@@ -9,7 +9,6 @@ import time
 
 from ..yolov5.lpdetector import Detector
 from ..lp.recognition import Recognition
-# from rospkg import RosPack
 
 class Tracker:
     """

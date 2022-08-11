@@ -9,8 +9,6 @@ sys.path.append(BASE_DIR)
 
 import yolov4.darknet as darknet
 
-import objtracker
-
 from rospkg import RosPack
 
 '''
@@ -21,48 +19,14 @@ OBJ_LIST = ['Car', 'Misc', 'Truck', 'rcircle', 'Cement_truck',
 'TrafficLight_Dig', 'gleft', 'Dump_Truck', 'TrafficLight_Yellow', 'gbike']
 '''
 
-class baseDet(object):
-    def __init__(self):
-        self.thresh = 0.25
-        self.stride = 1
-
-    def build_config(self):
-        self.frameCounter = 0
-
-    def feedCap(self, im, func_status):
-        retDict = {
-            'frame': None,
-            'list_of_ids': None,
-            'obj_bboxes': []
-        }
-        self.frameCounter += 1
-        
-        start = time.time()
-        im, bboxes_msg = objtracker.update(self, im)
-        frame_time = time.time() - start
-        print('******frame: {} fps*********'.format(int(1/frame_time)))
-        
-        retDict['frame'] = im
-        retDict['obj_bboxes'] = bboxes_msg 
-
-        return retDict
-
-    def init_model(self):
-        raise EOFError("Undefined model type.")
-
-    def preprocess(self):
-        raise EOFError("Undefined model type.")
-
-    def detect(self):
-        raise EOFError("Undefined model type.")
-    
-
-
-class Detector(baseDet):
+class Detector(object):
     def __init__(self):
         super(Detector, self).__init__()
+        self.thresh = 0.25
+        self.stride = 1
+        self.frameCounter = 0
+        
         self.init_model()
-        self.build_config()
 
     def init_model(self):
         self.batchsize = 1
@@ -113,4 +77,4 @@ class Detector(baseDet):
                 car_boxes.append((ori_x, ori_y, ori_w, ori_h, pred_cls, pred_conf))
                            
                 
-        return im, car_boxes  
+        return car_boxes  

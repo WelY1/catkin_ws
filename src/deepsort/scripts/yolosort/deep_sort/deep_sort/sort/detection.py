@@ -28,7 +28,7 @@ class Detection(object):
     """
 
     def __init__(self, tlwh, confidence, feature, car):
-        self.tlwh = np.asarray(tlwh, dtype=np.float)                              # 将array转化为ndarray
+        self.tlwh = np.asarray(tlwh, dtype=np.float)                            
         self.confidence = float(confidence)
         self.feature = np.asarray(feature, dtype=np.float32)
         self.car = np.asarray(car, dtype=np.int) 

@@ -59,12 +59,10 @@ def plot_bboxes(image, bboxes, line_thickness=None):
         list_pts.clear()
     return image
 
-def update(target_detector, image):
+def update(image, bboxes):
 
-        det_start = time.time()
-        _, bboxes = target_detector.detect(image)              #  img,  [x1, y1, x2, y2, class, confidence]
-        det_time = time.time() - det_start
-        
+        # _, bboxes = target_detector.detect(image)              #  img,  [x1, y1, x2, y2, class, confidence]
+
         bbox_xywh = []
         confs = []
         bboxes2draw = []
