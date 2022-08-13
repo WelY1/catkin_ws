@@ -27,6 +27,7 @@ class Recognition(object):
         self.workers = 4
         self.batch_size = 64
         self.saved_model = RosPack().get_path('deepsort') + "/scripts/yolosort/deep_sort/deep_sort/lp/None-VGG-BiLSTM-CTC.pth"
+        model_name = self.saved_model.split('/')[-1][:-4].split('-')
         """ Data processing """
         self.batch_max_length = 25
         self.imgH = 32
@@ -36,10 +37,10 @@ class Recognition(object):
         self.sensitive = False
         self.character = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ藏川鄂甘赣港贵桂黑沪吉冀津晋京辽鲁蒙闽宁青琼陕苏皖湘新渝豫粤云浙'
         """ Model Architecture """
-        self.Transformation = 'None'    # 'TPS'
-        self.FeatureExtraction = 'VGG' # 'ResNet'
-        self.SequenceModeling = 'BiLSTM'
-        self.Prediction = 'CTC'   # 'Attn'
+        self.Transformation = model_name[0]     # 'None' | 'TPS'
+        self.FeatureExtraction = model_name[1]  # 'VGG' | 'ResNet'
+        self.SequenceModeling = model_name[2]   # 'None' | 'BiLSTM'
+        self.Prediction = model_name[3]         # 'CTC' | 'Attn'
         self.num_fiducial = 20
         self.input_channel = 3
         self.output_channel = 512
@@ -49,6 +50,7 @@ class Recognition(object):
             self.converter = CTCLabelConverter(self.character)
         else:
             self.converter = AttnLabelConverter(self.character)
+        
         self.num_class = len(self.converter.character)
 
         """ vocab / character number configuration """
@@ -127,16 +129,17 @@ class Recognition(object):
 if __name__ == '__main__':
     
     recognition =  Recognition()
-    
+    start = time.time()
+        
     for i in range(12):
-    
+        
         img = []
-        file_name = "/home/zxc/catkin_ws/src/deepsort/scripts/lp/demo_image/" + str(i+1) + ".jpg"
+        file_name = "/home/zxc/catkin_ws/src/deepsort/scripts/yolosort/deep_sort/deep_sort/lp/demo_image/" + str(i+1) + ".jpg"
         im = cv2.imread(file_name)
         img.append(im)
         
-        start = time.time()
-        
+        start1 = time.time()
         lp, conf =recognition(img)
-        print(lp, conf, time.time()-start)
+        print(lp, conf,time.time()-start1)
+    print((time.time()-start)/12)
 

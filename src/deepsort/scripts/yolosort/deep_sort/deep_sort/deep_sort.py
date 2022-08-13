@@ -24,7 +24,7 @@ class DeepSort(object):
         self.extractor = Extractor(model_path, use_cuda=use_cuda) # 用于提取一个batch图片对应的特征
 
         max_cosine_distance = max_dist # 最大余弦距离，用于级联匹配，如果大于该阈值，则忽略
-        nn_budget = 100 # 每个类别gallery最多的外观描述子的个数，如果超过，删除旧的
+        # nn_budget = 100 # 每个类别gallery最多的外观描述子的个数，如果超过，删除旧的
         # NearestNeighborDistanceMetric 最近邻距离度量
         # 对于每个目标，返回到目前为止已观察到的任何样本的最近距离（欧式或余弦）。
         # 由距离度量方法构造一个 Tracker。
