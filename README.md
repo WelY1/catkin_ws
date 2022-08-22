@@ -14,6 +14,10 @@
 
 ROS
 
+[yolov4-trt](https://github.com/jkjung-avt/tensorrt_demos)
+
+[yolov5-trt](https://github.com/wang-xinyu/tensorrtx)
+
 
 #### 安装教程
 
@@ -57,3 +61,13 @@ OCR目前的权重是CCPD2020数据集训练的，所以结果都是新能源车
 2.  -2022/08/11 version 2.1
     修改了输入方式，现在可以接收别的node发送过来的图片了
     重写了一下主函数，更简洁了。
+3.  -2022/08/13 version 2.2
+    用sort替代deepsort, 暂时取消了lp检测和识别部分
+    
+ // version 3.0 version 3.0
+1.  -2022/08/22 version 3.1
+    (1)把yolov4-tiny的darknet模型转换为tensorrt模型，推理速度平均282fps，重写了objdetector.py文件
+       参考[yolov4-trt](https://github.com/jkjung-avt/tensorrt_demos) 
+    (2)修改了bbox的消息格式，与莫工提供的消息格式保持统一
+       /msg/Boundingbox.msg   /msg/Boundingboxes.msg 
+    
