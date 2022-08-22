@@ -112,6 +112,7 @@ class KalmanBoxTracker(object):
     self.kf.Q[4:,4:] *= 0.01
 
     self.kf.x[:4] = convert_bbox_to_z(bbox)
+    self.conf = bbox[4]  # conf
     self.time_since_update = 0
     self.id = KalmanBoxTracker.count
     KalmanBoxTracker.count += 1
@@ -148,7 +149,7 @@ class KalmanBoxTracker(object):
     """
     Returns the current bounding box estimate.
     """
-    return convert_x_to_bbox(self.kf.x)
+    return convert_x_to_bbox(self.kf.x, self.conf)  #[x1,y1,x2,y2,conf]
 
 
 def associate_detections_to_trackers(detections,trackers,iou_threshold = 0.3):
