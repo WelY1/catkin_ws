@@ -1,12 +1,11 @@
 #! /usr/bin/python
 
 import rospy
-import imutils
 import cv2
 import time
 
 from yolosort.objdetector import TrtYOLO as Detector
-import yolosort.objtracker as mot
+import yolosort.objtracker as Mot
 
 from cv_bridge import CvBridge
 
@@ -17,7 +16,6 @@ from sensor_msgs.msg import Image
 def callback_image(msg):
     global bridge
     global det
-    # global mot
     global boxes_msg
     global rate
     frame_img = bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
@@ -30,18 +28,24 @@ def callback_image(msg):
     
     start = time.time()
     boxes = det.detect(frame_img)
-    drawed_img, bboxes = mot.update(frame_img, boxes)
+    # print(boxes)
+    drawed_img, bev_image, bboxes = Mot.update(frame_img, boxes)
     
     boxes_msg.header.stamp = rospy.Time.now()
     boxes_msg.image_header.stamp = rospy.Time.now()
     boxes_msg.bounding_boxes = bboxes
     
-    print('*****{} fps*****'.format(1/(time.time()-start)))
+    print('*****{:1f} fps*****'.format(1/(time.time()-start)), end='\r')
     
-    drawed_img = imutils.resize(drawed_img, height=500)
-    cv2.imshow('demo',drawed_img)
-    t = int(1000/20)
-    cv2.waitKey(t)
+    cv2.namedWindow('bev_img',0)
+    cv2.resizeWindow('bev_img',900,500)
+    cv2.imshow('bev_img',bev_image)
+    
+    cv2.namedWindow('ori_img',0)
+    cv2.resizeWindow('ori_img',900,500)
+    cv2.imshow('ori_img',drawed_img)
+    
+    cv2.waitKey(10)
 
     boxes_pub.publish(boxes_msg)
     rate.sleep()

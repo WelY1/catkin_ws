@@ -67,7 +67,22 @@ OCR目前的权重是CCPD2020数据集训练的，所以结果都是新能源车
  // version 3.0 version 3.0
 1.  -2022/08/22 version 3.1
     (1)把yolov4-tiny的darknet模型转换为tensorrt模型，推理速度平均282fps，重写了objdetector.py文件
-       参考[yolov4-trt](https://github.com/jkjung-avt/tensorrt_demos) 
-    (2)修改了bbox的消息格式，与莫工提供的消息格式保持统一
-       /msg/Boundingbox.msg   /msg/Boundingboxes.msg 
     
+       参考[yolov4-trt](https://github.com/jkjung-avt/tensorrt_demos) 
+       
+    (2)修改了bbox的消息格式，与莫工提供的消息格式保持统一
+    
+       /msg/Boundingbox.msg   /msg/Boundingboxes.msg 
+
+2.  -2022/08/25 version 3.2
+    (1)sort现在可以保存box的类别了，实现多类别跟踪，并输出不同颜色的框
+    
+    (2)在bev图像中测量车道线距离，确定图像像素与真实世界坐标系之间的比例
+        具体使用方法：
+        先运行get_canny_parameters.py，通过拖动滑动条来调整canny边缘检测阈值，
+        再运行get_scale.py，需要手动调整ROI区域，来定位相邻车道线，在bev中测量车道线的像素距离来求比例尺
+        （只需要运行一次即可）
+    
+    (3)更新了图像，可以生成bev图像了。
+        
+        

@@ -78,7 +78,7 @@ def convert_bbox_to_z(bbox):
   return np.array([x, y, s, r]).reshape((4, 1))
 
 
-def convert_x_to_bbox(x,score=None):
+def convert_x_to_bbox(x,score=None,clss=None):
   """
   Takes a bounding box in the centre form [x,y,s,r] and returns it in the form
     [x1,y1,x2,y2] where x1,y1 is the top left and x2,y2 is the bottom right
@@ -87,8 +87,10 @@ def convert_x_to_bbox(x,score=None):
   h = x[2] / w
   if(score==None):
     return np.array([x[0]-w/2.,x[1]-h/2.,x[0]+w/2.,x[1]+h/2.]).reshape((1,4))
-  else:
+  elif(clss==None):
     return np.array([x[0]-w/2.,x[1]-h/2.,x[0]+w/2.,x[1]+h/2.,score]).reshape((1,5))
+  else:
+    return np.array([x[0]-w/2.,x[1]-h/2.,x[0]+w/2.,x[1]+h/2.,score,clss]).reshape((1,6))
 
 
 class KalmanBoxTracker(object):
@@ -113,6 +115,7 @@ class KalmanBoxTracker(object):
 
     self.kf.x[:4] = convert_bbox_to_z(bbox)
     self.conf = bbox[4]  # conf
+    self.cls = bbox[5]
     self.time_since_update = 0
     self.id = KalmanBoxTracker.count
     KalmanBoxTracker.count += 1
@@ -149,7 +152,7 @@ class KalmanBoxTracker(object):
     """
     Returns the current bounding box estimate.
     """
-    return convert_x_to_bbox(self.kf.x, self.conf)  #[x1,y1,x2,y2,conf]
+    return convert_x_to_bbox(self.kf.x, self.conf, self.cls)  #[x1,y1,x2,y2,conf,cls]
 
 
 def associate_detections_to_trackers(detections,trackers,iou_threshold = 0.3):
@@ -208,11 +211,11 @@ class Sort(object):
     self.trackers = []
     self.frame_count = 0
 
-  def update(self, dets=np.empty((0, 5))):
+  def update(self, dets=np.empty((0, 6))):
     """
     Params:
       dets - a numpy array of detections in the format [[x1,y1,x2,y2,score],[x1,y1,x2,y2,score],...]
-    Requires: this method must be called once for each frame even with empty detections (use np.empty((0, 5)) for frames without detections).
+    Requires: this method must be called once for each frame even with empty detections (use np.empty((0, 7)) for frames without detections).
     Returns the a similar array, where the last column is the object ID.
 
     NOTE: The number of objects returned may differ from the number of detections provided.
@@ -251,7 +254,7 @@ class Sort(object):
           self.trackers.pop(i)
     if(len(ret)>0):
       return np.concatenate(ret)
-    return np.empty((0,5))
+    return np.empty((0,7))
 
 def parse_args():
     """Parse input arguments."""
