@@ -14,9 +14,11 @@ OBJ_LIST = ['Car', 'Misc', 'Truck', 'rcircle', 'Cement_truck',
 # from __future__ import print_function
 
 import ctypes
+from turtle import st
 
 import numpy as np
 import cv2
+import time
 
 import tensorrt as trt
 import pycuda.autoinit 
@@ -332,12 +334,18 @@ class TrtYOLO(object):
                 
         if self.cuda_ctx:
             self.cuda_ctx.push()
+        
+        
+        # start = time.time()
+        # inference
         trt_outputs = self.inference_fn(
             context=self.context,
             bindings=self.bindings,
             inputs=self.inputs,
             outputs=self.outputs,
             stream=self.stream)
+        # cur_time = time.time() - start
+        
         if self.cuda_ctx:
             self.cuda_ctx.pop()
 
@@ -362,3 +370,31 @@ class TrtYOLO(object):
                   )
             boxes.append(box)
         return boxes
+
+
+if __name__ == '__main__':
+    import torch
+    model = TrtYOLO()
+
+    dummy_input = cv2.imread('/home/zxc/yutong/Yolov4_DeepSocial/ori_img.jpg')
+    
+    repetitions = 300
+    timings=np.zeros((repetitions,1))
+    
+    # GPU warm-up
+    for _ in range(10):
+        _, _ = model.detect(dummy_input)
+    #
+    with torch.no_grad():
+        for rep in range(repetitions):
+            
+            _, infer_time = model.detect(dummy_input)
+            # WAIT FOR GPU SYNC
+            # torch.cuda.synchronize()
+            timings[rep] = infer_time
+            
+mean_syn = np.sum(timings) / repetitions
+std_syn = np.std(timings)
+mean_fps = 1. / mean_syn
+print(' * Mean@1 {mean_syn:.3f}ms Std@5 {std_syn:.3f}ms FPS@1 {mean_fps:.2f}'.format(mean_syn=mean_syn, std_syn=std_syn, mean_fps=mean_fps))
+print(mean_syn)

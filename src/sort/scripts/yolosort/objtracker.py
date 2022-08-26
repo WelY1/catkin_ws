@@ -138,7 +138,8 @@ def update(image0, bboxes):
                 bbox_msg = BoundingBox(conf, x1, y1, x2, y2, track_id, label)
                 bboxes.append(bbox_msg)
                 
+            bev_image = plot_bev(image0, bboxes2bev)   
             drawed_image = plot_bboxes(image0, bboxes2draw)
-            bev_image = plot_bev(image0, bboxes2bev)
+            
 
         return drawed_image, bev_image, bboxes

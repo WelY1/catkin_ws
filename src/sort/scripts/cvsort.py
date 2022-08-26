@@ -19,7 +19,7 @@ def callback_image(msg):
     global boxes_msg
     global rate
     frame_img = bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
-
+    print(frame_img.shape)
     # cv2.imshow('ori_img', frame_img)
     # h,w = frame_img.shape[:2]
     # print(h,w)
@@ -28,27 +28,30 @@ def callback_image(msg):
     
     start = time.time()
     boxes = det.detect(frame_img)
-    # print(boxes)
     drawed_img, bev_image, bboxes = Mot.update(frame_img, boxes)
     
+    # publish
     boxes_msg.header.stamp = rospy.Time.now()
     boxes_msg.image_header.stamp = rospy.Time.now()
     boxes_msg.bounding_boxes = bboxes
+    boxes_pub.publish(boxes_msg)
     
-    print('*****{:1f} fps*****'.format(1/(time.time()-start)), end='\r')
-    
+    # 可视化
     cv2.namedWindow('bev_img',0)
     cv2.resizeWindow('bev_img',900,500)
-    cv2.imshow('bev_img',bev_image)
-    
+    cv2.imshow('bev_img',bev_image)  
     cv2.namedWindow('ori_img',0)
     cv2.resizeWindow('ori_img',900,500)
-    cv2.imshow('ori_img',drawed_img)
-    
+    cv2.imshow('ori_img',drawed_img)  
     cv2.waitKey(10)
-
-    boxes_pub.publish(boxes_msg)
+    
+    print('*****{:1f} fps*****'.format(1/(time.time()-start)), end='\r')
     rate.sleep()
+    
+    
+    
+    
+    
     
 def main():
         

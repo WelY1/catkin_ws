@@ -66,7 +66,7 @@ OCR目前的权重是CCPD2020数据集训练的，所以结果都是新能源车
     
  // version 3.0 version 3.0
 1.  -2022/08/22 version 3.1
-    (1)把yolov4-tiny的darknet模型转换为tensorrt模型，推理速度平均282fps，重写了objdetector.py文件
+    (1)把yolov4-tiny的darknet模型转换为tensorrt模型，推理速度提升(448fps -> 1131fps)，重写了objdetector.py文件
     
        参考[yolov4-trt](https://github.com/jkjung-avt/tensorrt_demos) 
        
@@ -84,5 +84,7 @@ OCR目前的权重是CCPD2020数据集训练的，所以结果都是新能源车
         （只需要运行一次即可）
     
     (3)更新了图像，可以生成bev图像了。
+    
+    
         
         
