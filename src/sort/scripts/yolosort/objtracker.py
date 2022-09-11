@@ -45,22 +45,21 @@ def ncolors(num):                   # 构建一个颜色list
   return rgb_colors
             
 COLORS = ncolors(28)
+
 pts1 = np.float32([[1,668],[845,198],[1196,157],[1913,436]]) # ori_img
 pts2 = np.float32([[10,740],[10,100],[1913,100],[1913,740]]) # bev_img
 M = cv2.getPerspectiveTransform(pts1, pts2) # Matrix of ori_img -> bev_img
 
 def plot_bboxes(image, bboxes, line_thickness=None):
     # Plots one bounding box on image img
-    tl = line_thickness or round(
-        0.002 * (image.shape[0] + image.shape[1]) / 2) + 1  # line/font thickness
-    list_pts = []
+    tl = line_thickness or round(0.002 * (image.shape[0] + image.shape[1]) / 2) + 1  # line/font thickness
     point_radius = 4
     
     for (x1, y1, x2, y2, clss, pos_id) in bboxes:
     
         color = COLORS[clss]
-        # check whether hit line                                                  每个bbox的标记点，可以用来计数
-        # check_point_x = x1                                                         # check_point_x   
+        # check whether hit line                                   # 每个bbox的标记点，可以用来计数
+        # check_point_x = x1                                       # check_point_x   
         # check_point_y = int(y1 + ((y2 - y1) * 0.6))              # check_point_y 
         check_point_x = int(x1 + ((x2 - x1) * 0.5))              
         check_point_y = int(y1 + ((y2 - y1) * 0.5))
@@ -75,10 +74,9 @@ def plot_bboxes(image, bboxes, line_thickness=None):
                     [225, 255, 255], thickness=tf, lineType=cv2.LINE_AA)
                     
         cv2.circle(image, (check_point_x, check_point_y),radius=point_radius, color=(0, 0, 255))
-        list_pts.clear()
     return image
     
-def perspectivePoint(x, y, M):
+def perspectivePoint(x, y, M, x0=960, y0=540, u0=10, v0=50, dx=0.022108, dy=0.159364):
     '''
     arg:
         point: x,y
@@ -92,8 +90,9 @@ def perspectivePoint(x, y, M):
     new_point1 = cv2.perspectiveTransform(point, M)
     
     [xx, yy] = [round(new_point1[0][0][0]),round(new_point1[0][0][1])]
-    
-    return xx,yy
+    x_world = (xx - x0) * dx + u0
+    y_world = (yy - y0) * dy + v0
+    return xx, yy, x_world, y_world
    
 def plot_bev(img, boxes):
   
@@ -132,9 +131,9 @@ def update(image0, bboxes):
                 # track_lp = ''
                 bboxes2draw.append((x1, y1, x2, y2, int(clss), track_id))
                 
-                x_bottom_center, y_bottom_center = perspectivePoint((x1+x2)/2, y2, M)
-                bboxes2bev.append((x_bottom_center, y_bottom_center))
-                
+                x_ground, y_ground, x_world, y_world = perspectivePoint((x1+x2)/2, y2, M)
+                bboxes2bev.append((x_ground, y_ground))
+                # print([x_world, y_world, int(clss), track_id])
                 bbox_msg = BoundingBox(conf, x1, y1, x2, y2, track_id, label)
                 bboxes.append(bbox_msg)
                 

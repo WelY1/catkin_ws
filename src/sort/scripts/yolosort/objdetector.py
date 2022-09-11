@@ -372,29 +372,29 @@ class TrtYOLO(object):
         return boxes
 
 
-if __name__ == '__main__':
-    import torch
-    model = TrtYOLO()
+# if __name__ == '__main__':
+#     import torch
+#     model = TrtYOLO()
 
-    dummy_input = cv2.imread('/home/zxc/yutong/Yolov4_DeepSocial/ori_img.jpg')
+#     dummy_input = cv2.imread('/home/zxc/yutong/Yolov4_DeepSocial/ori_img.jpg')
     
-    repetitions = 300
-    timings=np.zeros((repetitions,1))
+#     repetitions = 300
+#     timings=np.zeros((repetitions,1))
     
-    # GPU warm-up
-    for _ in range(10):
-        _, _ = model.detect(dummy_input)
-    #
-    with torch.no_grad():
-        for rep in range(repetitions):
+#     # GPU warm-up
+#     for _ in range(10):
+#         _, _ = model.detect(dummy_input)
+#     #
+#     with torch.no_grad():
+#         for rep in range(repetitions):
             
-            _, infer_time = model.detect(dummy_input)
-            # WAIT FOR GPU SYNC
-            # torch.cuda.synchronize()
-            timings[rep] = infer_time
+#             _, infer_time = model.detect(dummy_input)
+#             # WAIT FOR GPU SYNC
+#             # torch.cuda.synchronize()
+#             timings[rep] = infer_time
             
-mean_syn = np.sum(timings) / repetitions
-std_syn = np.std(timings)
-mean_fps = 1. / mean_syn
-print(' * Mean@1 {mean_syn:.3f}ms Std@5 {std_syn:.3f}ms FPS@1 {mean_fps:.2f}'.format(mean_syn=mean_syn, std_syn=std_syn, mean_fps=mean_fps))
-print(mean_syn)
+# mean_syn = np.sum(timings) / repetitions
+# std_syn = np.std(timings)
+# mean_fps = 1. / mean_syn
+# print(' * Mean@1 {mean_syn:.3f}ms Std@5 {std_syn:.3f}ms FPS@1 {mean_fps:.2f}'.format(mean_syn=mean_syn, std_syn=std_syn, mean_fps=mean_fps))
+# print(mean_syn)

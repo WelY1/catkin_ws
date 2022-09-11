@@ -19,7 +19,7 @@ def callback_image(msg):
     global boxes_msg
     global rate
     frame_img = bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
-    print(frame_img.shape)
+    # print(frame_img.shape)
     # cv2.imshow('ori_img', frame_img)
     # h,w = frame_img.shape[:2]
     # print(h,w)
@@ -43,7 +43,7 @@ def callback_image(msg):
     cv2.namedWindow('ori_img',0)
     cv2.resizeWindow('ori_img',900,500)
     cv2.imshow('ori_img',drawed_img)  
-    cv2.waitKey(10)
+    cv2.waitKey(1)
     
     print('*****{:1f} fps*****'.format(1/(time.time()-start)), end='\r')
     rate.sleep()
