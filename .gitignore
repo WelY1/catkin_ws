@@ -12,7 +12,7 @@
 # 权重文件
 *.pt
 *.pth
-*.weights
+
 # samples
 *.mp4
 *.jpg
