@@ -1,6 +1,7 @@
 /src/image_trans
 /src/plumbing_server_client
 /.catkin_workspace
+/src/script/src
 
 *.vscode
 *.idea
@@ -12,6 +13,8 @@
 # 权重文件
 *.pt
 *.pth
+*.so
+*.trt
 
 # samples
 *.mp4
