@@ -1,7 +1,7 @@
 /src/image_trans
 /src/plumbing_server_client
 /.catkin_workspace
-/src/script/src
+/src/camera/src
 
 *.vscode
 *.idea

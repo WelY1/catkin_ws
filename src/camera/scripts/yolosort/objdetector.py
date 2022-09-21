@@ -14,7 +14,6 @@ OBJ_LIST = ['Car', 'Misc', 'Truck', 'rcircle', 'Cement_truck',
 # from __future__ import print_function
 
 import ctypes
-from turtle import st
 
 import numpy as np
 import cv2
