@@ -3,13 +3,6 @@
 Implementation of TrtYOLO class with the yolo_layer plugins.
 """
 
-'''
-OBJ_LIST = ['Car', 'Misc', 'Truck', 'rcircle', 'Cement_truck', 
-'Pedestrian', 'Cyclist', 'gcircle', 'TrafficLight_Black', 'Bus', 
-'ycircle', 'rperson', 'Tram', 'gperson', 'Trailer', 'TrafficLight_Red',
-'gup', 'Fule_Tank', 'TrafficLight_Green', 'rup', 'yright', 'rright', 'rleft',
-'TrafficLight_Dig', 'gleft', 'Dump_Truck', 'TrafficLight_Yellow', 'gbike']
-'''
 
 # from __future__ import print_function
 
@@ -26,12 +19,8 @@ import pycuda.driver as cuda
 from rospkg import RosPack
 
 so_path = RosPack().get_path('camera') + '/scripts/yolosort/yolov4/libyolo_layer.so'
-try:
-    ctypes.cdll.LoadLibrary(so_path)
-except OSError as e:
-    raise SystemExit('ERROR: failed to load ./plugins/libyolo_layer.so.  '
-                     'Did you forget to do a "make" in the "./plugins/" '
-                     'subdirectory?') from e
+ctypes.CDLL(so_path)
+
 
 
 def _preprocess_yolo(img, input_shape, letter_box=False):
@@ -288,12 +277,13 @@ class TrtYOLO(object):
         with open(TRTbin, 'rb') as f, trt.Runtime(self.trt_logger) as runtime:
             return runtime.deserialize_cuda_engine(f.read())
 
-    def __init__(self):
+    def __init__(self, conf_th=0.3, nms_th=0.5):
         """Initialize TensorRT plugins, engine and conetxt."""
         self.model = RosPack().get_path('camera') + '/scripts/yolosort/yolov4/yolov4-tiny.trt'
         self.category_num = 28
         self.letter_box = False
-        self.conf_th = 0.3,
+        self.conf_th = conf_th
+        self.nms_th = nms_th
         device = cuda.Device(0)
         self.cuda_ctx = device.make_context()
         if self.cuda_ctx:
@@ -318,18 +308,19 @@ class TrtYOLO(object):
 
     def __del__(self):
         """Free CUDA memories."""
-        # del self.engine
-        # self.cuda_ctx.pop()
-        # del self.context
-        del self.outputs
-        del self.inputs
+        del self.engine
+        self.cuda_ctx.pop()
+        del self.context
         del self.stream
+        del self.inputs
+        del self.outputs
 
     def detect(self, img, letter_box=None):
         """Detect objects in the input image."""
         letter_box = self.letter_box if letter_box is None else letter_box
+        start2 = time.time()
         img_resized = _preprocess_yolo(img, self.input_shape, letter_box)
-
+        time2 = time.time() - start2
         # Set host input to the image. The do_inference() function
         # will copy the input to the GPU before executing.
         self.inputs[0].host = np.ascontiguousarray(img_resized)
@@ -337,7 +328,7 @@ class TrtYOLO(object):
         if self.cuda_ctx:
             self.cuda_ctx.push()
             
-        # start = time.time()
+        start3 = time.time()
         # inference
         trt_outputs = self.inference_fn(
             context=self.context,
@@ -345,14 +336,15 @@ class TrtYOLO(object):
             inputs=self.inputs,
             outputs=self.outputs,
             stream=self.stream)
-        # cur_time = time.time() - start
+        time3 = time.time() - start3
         
         if self.cuda_ctx:
             self.cuda_ctx.pop()
-
+        
+        start4 = time.time()
         boxes_pred, confs_pred, clss_pred = _postprocess_yolo(
             trt_outputs, img.shape[1], img.shape[0], self.conf_th,
-            nms_threshold=0.5, input_shape=self.input_shape,
+            nms_threshold=self.nms_th, input_shape=self.input_shape,
             letter_box=letter_box)
 
         # clip x1, y1, x2, y2 within original image
@@ -362,16 +354,17 @@ class TrtYOLO(object):
         boxes = []
         # print(boxes_pred,confs_pred,clss_pred)
         for i in range(len(boxes_pred)):
-            box = (boxes_pred[i][0],
-                   boxes_pred[i][1],
-                   boxes_pred[i][2],
-                   boxes_pred[i][3],
+            box = (int(boxes_pred[i][0]),
+                   int(boxes_pred[i][1]),
+                   int(boxes_pred[i][2]),
+                   int(boxes_pred[i][3]),
                    confs_pred[i],
-                   clss_pred[i]
-                  )
+                   int(clss_pred[i])
+                   )
             boxes.append(box)
-        return boxes
-
+        
+        time4 = time.time() - start4
+        return boxes, time2, time3, time4
 
 # if __name__ == '__main__':
 #     import torch

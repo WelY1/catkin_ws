@@ -27,16 +27,16 @@ ROS
 
 #### 使用说明
 
-1.  roscore 
-2.  rosrun deepsort lp_process.py        # 车牌检测及识别node
-3.  rosrun deepsort yolosort.py          # 车辆检测及deepsort
+1. roscore 
 
+2. rosrun camear cvsort.py
+
+3. rosrun camear lpsort.py
+
+4. roslaunch multi_object_tracker multi_object_tracker.launch
 ### #error
 如果提示找不到yolosort，则把/devel/lib/*.py 全删了，不知道还有没有其他办法
 
-### 问题
-OCR目前的权重是CCPD2020数据集训练的，所以结果都是新能源车牌且区域码都是安徽
-目前占用显存比较多，车牌检测及OCR结点大约占用4GB，yolov4及deepsort结点大约占5GB
 
 #### 更新信息
  // version 1 (branch main)
@@ -66,7 +66,7 @@ OCR目前的权重是CCPD2020数据集训练的，所以结果都是新能源车
     
  // version 3.0 version 3.0
 1.  -2022/08/22 version 3.1
-    (1)把yolov4-tiny的darknet模型转换为tensorrt模型，推理速度提升(448fps -> 1131fps)，重写了objdetector.py文件
+    (1)把yolov4-tiny的darknet模型转换为tensorrt模型，推理速度提升(448fps -> 1131fps，在3080显卡仅网络推理)，重写了objdetector.py文件
     
        参考[yolov4-trt](https://github.com/jkjung-avt/tensorrt_demos) 
        
@@ -99,10 +99,23 @@ OCR目前的权重是CCPD2020数据集训练的，所以结果都是新能源车
     待更新：
     
     车牌检测及识别加到跟踪中，目前车牌检测用yolov5s-tensorrt(int8),识别用'None-VGG-BiLSTM-CTC'-tensorrt(fp16)。
-    在RTX3080上检测识别一张车牌时间在2s以内。
+    在RTX3080上检测识别一张车牌时间在2ms以内。
     
-    
-    
-    
+4.  -2022/10/19 version 3.4 final
+    (1)重新用cv_bridge替换ros_numpy，速度提高七八倍，直接在工作空间下编译没问题，若想在所有环境都编译成功问题较大。具体见[csdn](https://blog.csdn.net/LoveJSH/article/details/126942789?spm=1001.2014.3001.5502)    
         
-        
+    (2)sort中用的kalmanfilter改用deepsort自带的.py文件，提速效果显著。具体见[csdn](https://blog.csdn.net/LoveJSH/article/details/127125028)
+    
+    (3)sort中启用子线程做车牌检测和识别。具体见[csdn](https://blog.csdn.net/LoveJSH/article/details/127152536)
+    
+    (4)可视化部分修改了颜色和文本位置，改用pillow-smid可显示中文。具体见[csdn](https://blog.csdn.net/LoveJSH/article/details/127287032)
+    
+    (5)添加了.launch文件，可以一键启动两个节点了: *roslaunch camera camera.launch*
+    
+    其他基本没啥了，项目结项就以这个作为最终版。
+    
+    待解决：
+    
+    2Dbbox接地点无法准确反映目标位置，可能得用3Dbbox来解决。
+    
+    由于小目标检测很容易漏检，所以跟踪时效果不佳；透视视角近大远小，大车容易遮挡小车，对跟踪影响较大。考虑在跟踪方面进行优化。

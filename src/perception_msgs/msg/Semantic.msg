@@ -8,3 +8,4 @@ uint8 PEDESTRIAN=6
 uint8 ANIMAL=7
 uint32 type
 float64 confidence
+string lp

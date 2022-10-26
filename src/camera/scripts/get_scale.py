@@ -97,16 +97,16 @@ def get_distance_point2line(point, line):
 
 def find_scale_x():
     '''1.canny边缘检测'''
-    img_path = '/home/zxc/yutong/Yolov4_DeepSocial/ori_img.jpg'
+    img_path = '/home/zxc/catkin_ws/src/camera/scripts/yutong.jpg'
     img=cv2.imread(img_path,cv2.IMREAD_GRAYSCALE)     #以灰度图形式读取图片，为canny边缘检测做准备
     img0=cv2.imread(img_path,cv2.IMREAD_COLOR)
     
-    edge_img=cv2.Canny(img,200,80)     #设定阈值，低于阈值被忽略，高于阈值被显示，
+    edge_img=cv2.Canny(img,82,126)     #设定阈值，低于阈值被忽略，高于阈值被显示，
                                            # 阈值的设定与图片的色彩有关，需要手动调整到合适的值（使车道线清晰显示出来）
 
     '''2.roi_mask(提取感兴趣的区域)'''
     mask=np.zeros_like(edge_img)   #变换为numpy格式的图片
-    mask=cv2.fillPoly(mask,np.array([[[850,600],[797,773],[1165,773],[1093,600]]]),color=255)   #对感兴趣区域制作掩膜
+    mask=cv2.fillPoly(mask,np.array([[[1000,813],[1425,813],[1452,847],[1004,853]]]),color=255)   #对感兴趣区域制作掩膜
     #在此做出说明，实际上，车载相机固定于一个位置，所以对于感兴趣的区域的位置也相对固定，这个视相机位置而定。
     # cv2.namedWindow('mask',0)
     # cv2.resizeWindow('mask',800,1200)
@@ -114,20 +114,26 @@ def find_scale_x():
     # cv2.waitKey(0)
     masked_edge_img=cv2.bitwise_and(edge_img,mask)   #与运算
     # cv2.imshow('mask',masked_edge_img)
+    # cv2.waitKey(0)
     
     '''3.霍夫变换，找出直线'''
     
-    lines=cv2.HoughLinesP(masked_edge_img,1,np.pi/180,15,minLineLength=50,maxLineGap=20)    #获取所有线段
-
-    right_lines=[line for line in lines if calculate_slope(line)>0]
-    left_lines=[line for line in lines if calculate_slope(line)<0]
+    lines=cv2.HoughLinesP(masked_edge_img,1,np.pi/180,15,minLineLength=25,maxLineGap=10)    #获取所有线段
+    # print(lines)
+    # right_lines=[line for line in lines if calculate_slope(line)>0]
+    # print(right_lines)
+    # left_lines=[line for line in lines if calculate_slope(line)<0]
+    # print(left_lines)
     
-    # print("right:{}".format(right_lines))  # 4条
-    # print("left:{}".format(left_lines))  # 4条
-    lines1 = [right_lines[0],right_lines[2]]
-    lines2 = [right_lines[1],right_lines[3]]
-    lines3 = [left_lines[0],left_lines[2]]
-    lines4 = [left_lines[1],left_lines[3]]
+    # lines1 = [right_lines[0],right_lines[2]]
+    # lines2 = [right_lines[1],right_lines[3]]
+    # lines3 = [left_lines[0],left_lines[2]]
+    # lines4 = [left_lines[1],left_lines[3]]
+    line1 = [[lines[0][0][0],lines[0][0][1]],[lines[0][0][2],lines[0][0][3]]]
+    line2 = [[lines[1][0][0],lines[1][0][1]],[lines[1][0][2],lines[1][0][3]]]
+    line3 = [[lines[2][0][0],lines[2][0][1]],[lines[2][0][2],lines[2][0][3]]]
+    line4 = [[lines[3][0][0],lines[3][0][1]],[lines[3][0][2],lines[3][0][3]]]
+    
     
     # '''4.离群值过滤'''
     # reject_abnormal_lines(right_lines,threshold=0.01)
@@ -138,10 +144,10 @@ def find_scale_x():
     # np.polyfit:多项式拟合
     #np.polyval: 多项式求值
     
-    line1 = least_squares_fit(lines1)  # *
-    line2 = least_squares_fit(lines2)
-    line3 = least_squares_fit(lines3)  
-    line4 = least_squares_fit(lines4)  # *
+    # line1 = least_squares_fit(lines1)  # *
+    # line2 = least_squares_fit(lines2)
+    # line3 = least_squares_fit(lines3)  
+    # line4 = least_squares_fit(lines4)  # *
     
     print('line_points in ori_img',end=' : ')
     print(line1[0],line1[1],line4[0],line4[1])
@@ -155,8 +161,10 @@ def find_scale_x():
     
     
     '''6.img2bev '''
-    pts1 = np.float32([[1,668],[845,198],[1196,157],[1913,436]]) # ori_img
-    pts2 = np.float32([[10,740],[10,100],[1913,100],[1913,740]]) # bev_img
+    # pts1 = np.float32([[566,1079],[1530,1079],[1261,634],[784,639]]) # ori_img
+    # pts2 = np.float32([[566,1079],[1530,1079],[1530,700],[566,700]]) # bev_img
+    pts1 = np.float32([[775,631],[2101,612],[1349,320],[935,328]]) # ori_img
+    pts2 = np.float32([[0,850],[1919,850],[1919,0],[0,0]]) # bev_img
     M = cv2.getPerspectiveTransform(pts1, pts2) # Matrix of ori_img -> bev_img
     img_bev = cv2.warpPerspective(img0, M, (img0.shape[1], img0.shape[0]), cv2.INTER_LINEAR)
     
@@ -174,7 +182,7 @@ def find_scale_x():
     
     '''7.calculate the scale '''
     pixel_distance = get_distance_point2line(l1_p1,[l2_p1[0],l2_p1[1],l2_p2[0],l2_p2[1]])
-    lane_width = 3.5  # unit:m  60km/h~3.5m ,>60km/h~3.75m
+    lane_width = 3.6  # unit:m  60km/h~3.5m ,>60km/h~3.75m
     scale = lane_width / pixel_distance
     print('Lane width in bev_img is <{}> pixel'.format(round(pixel_distance)))
     print('Lane width in real world is <{}> m'.format(lane_width))
@@ -182,18 +190,17 @@ def find_scale_x():
 
 def find_scale_y():
     '''1.canny边缘检测'''
-    img_path = '/home/zxc/yutong/Yolov4_DeepSocial/ori_img.jpg'
+    img_path = '/home/zxc/catkin_ws/src/camera/scripts/yutong.jpg'
     img=cv2.imread(img_path,cv2.IMREAD_GRAYSCALE)     #以灰度图形式读取图片，为canny边缘检测做准备
     img0=cv2.imread(img_path,cv2.IMREAD_COLOR)
     
-    edge_img=cv2.Canny(img,117,208)     #设定阈值，低于阈值被忽略，高于阈值被显示，
+    edge_img=cv2.Canny(img,270, 240)     #设定阈值，低于阈值被忽略，高于阈值被显示，
                                            # 阈值的设定与图片的色彩有关，需要手动调整到合适的值（使车道线清晰显示出来）
     # cv2.imshow('edge_img',edge_img)
     
     '''2.roi_mask(提取感兴趣的区域)'''
     mask=np.zeros_like(edge_img)   #变换为numpy格式的图片
-    mask=cv2.fillPoly(mask,np.array([[[777,483],[820,479],[849,427],[813,435]]]),color=255)   #对感兴趣区域制作掩膜
-    #在此做出说明，实际上，相机固定于一个位置，所以对于感兴趣的区域的位置也相对固定，这个视相机位置而定。
+    mask=cv2.fillPoly(mask,np.array([[[875,534],[919,534],[905,606],[855,606]]]),color=255)   #对感兴趣区域制作掩膜
     # cv2.namedWindow('mask',0)
     # cv2.resizeWindow('mask',800,1200)
     # cv2.imshow('mask',mask)
@@ -203,9 +210,9 @@ def find_scale_y():
     # cv2.waitKey(0)
     '''3.霍夫变换，找出直线'''
     
-    lines=cv2.HoughLinesP(masked_edge_img,1,np.pi/180,10,minLineLength=10,maxLineGap=10)    #获取所有线段
+    lines=cv2.HoughLinesP(masked_edge_img,1,np.pi/180,15,minLineLength=1,maxLineGap=20)    #获取所有线段
     lines = [line for line in lines if abs(calculate_slope(line))<0.5]
-    # print(lines)
+    print(lines)
     # return 0
     # right_lines=[line for line in lines if calculate_slope(line)>0]
     # left_lines=[line for line in lines if calculate_slope(line)<0]
@@ -246,8 +253,8 @@ def find_scale_y():
     
     
     '''6.img2bev '''
-    pts1 = np.float32([[1,668],[845,198],[1196,157],[1913,436]]) # ori_img
-    pts2 = np.float32([[10,740],[10,100],[1913,100],[1913,740]]) # bev_img
+    pts1 = np.float32([[775,631],[2101,612],[1349,320],[935,328]]) # ori_img
+    pts2 = np.float32([[0,850],[1919,850],[1919,0],[0,0]]) # bev_img
     M = cv2.getPerspectiveTransform(pts1, pts2) # Matrix of ori_img -> bev_img
     img_bev = cv2.warpPerspective(img0, M, (img0.shape[1], img0.shape[0]), cv2.INTER_LINEAR)
     
@@ -265,7 +272,7 @@ def find_scale_y():
     
     '''7.calculate the scale '''
     pixel_distance = get_distance_point2line(l1_p1,[l2_p1[0],l2_p1[1],l2_p2[0],l2_p2[1]])
-    lane_width = 3  # unit:m             pedestrain lane min width is 3 meter.
+    lane_width = 4.8  # unit:m             pedestrain lane min width is 3 meter.
     scale = lane_width / pixel_distance
     print('Lane width in bev_img is <{}> pixel'.format(round(pixel_distance)))
     print('Lane width in real world is <{}> m'.format(lane_width))

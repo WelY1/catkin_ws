@@ -1,0 +1,13 @@
+<launch>
+    
+    <node   pkg="camera" 
+            type="cvsort.py"  
+            name="cvsort" 
+            respawn="true" 
+    />
+    <node   pkg="camera" 
+            type="lpsort.py"  
+            name="lpsort"  
+            respawn="true" 
+    />
+</launch>
